@@ -9,6 +9,7 @@ server 'web.server.ip', user: 'staging-username', roles: %w{web app db}
 
 set :stage, :staging
 set :log_level, :info
+
 set :ssh_options, {
   keys: %w(~/.ssh/id_rsa)
 }

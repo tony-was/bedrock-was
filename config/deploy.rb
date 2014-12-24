@@ -16,6 +16,9 @@ set :linked_files, fetch(:linked_files, []).push('.env', 'web/.htaccess')
 #set :linked_files, fetch(:linked_files, []).push('.env')
 set :linked_dirs, fetch(:linked_dirs, []).push('web/app/uploads')
 
+require 'dotenv'
+Dotenv.load
+
 namespace :deploy do
   desc 'Restart application'
   task :restart do
@@ -88,3 +91,30 @@ namespace :grunt do
 end
 
 after 'deploy:publishing', 'grunt:build'
+
+set :base_db_filename, -> {"#{fetch(:application)}-#{Time.now.getutc.to_i}.sql"}
+set :wpcli_remote_db_file, -> {"#{fetch(:tmp_dir)}/#{fetch(:base_db_filename)}"}
+set :wpcli_local_db_file, -> {"/tmp/#{fetch(:base_db_filename)}"}
+set :vagrant_root, -> {"../bedrock-ansible"}
+namespace :migrate do
+  namespace :db do
+    desc "Downloads remote database into Vagrant"
+    task :pull do
+      on roles(:web) do
+        within release_path do
+          execute :wp, :db, :export, "- |", :gzip, ">", "#{fetch(:wpcli_remote_db_file)}.gz"
+          download! "#{fetch(:wpcli_remote_db_file)}.gz", "#{fetch(:wpcli_local_db_file)}.gz"
+          execute :rm, "#{fetch(:wpcli_remote_db_file)}.gz"
+          run_locally do
+            execute :gunzip, "#{fetch(:wpcli_local_db_file)}.gz"
+            within fetch(:vagrant_root) do
+              execute :vagrant, :up
+              execute "ssh -i ~/.vagrant.d/insecure_private_key vagrant@#{fetch(:dev_application)} mysql -u#{ENV['DB_USER']} -p#{ENV['DB_PASSWORD']} #{ENV['DB_NAME']} < #{fetch(:wpcli_local_db_file)}"
+            end
+            execute "rm #{fetch(:wpcli_local_db_file)}"
+          end
+        end
+      end
+    end
+  end
+end
