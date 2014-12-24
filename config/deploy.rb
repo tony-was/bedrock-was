@@ -97,9 +97,11 @@ set :wpcli_remote_db_file, -> {"#{fetch(:tmp_dir)}/#{fetch(:base_db_filename)}"}
 set :wpcli_local_db_file, -> {"/tmp/#{fetch(:base_db_filename)}"}
 set :vagrant_root, -> {"../bedrock-ansible"}
 namespace :migrate do
-  namespace :db do
+  namespace :pull do
+    desc "Downloads both remote database & syncs remote files into Vagrant"
+    task :all => ["pull:db", "pull:files"]
     desc "Downloads remote database into Vagrant"
-    task :pull do
+    task :db do
       on roles(:web) do
         within release_path do
           execute :wp, :db, :export, "- |", :gzip, ">", "#{fetch(:wpcli_remote_db_file)}.gz"
@@ -113,6 +115,13 @@ namespace :migrate do
             end
             execute "rm #{fetch(:wpcli_local_db_file)}"
           end
+        end
+      end
+    end
+    task :files do
+      on roles(:web) do
+        within shared_path do
+          system("rsync -a --del -L -K -vv --progress --rsh='ssh -p 22' #{fetch(:user)}@#{fetch(:application)}:#{shared_path}/web/app/uploads ./web/app")
         end
       end
     end

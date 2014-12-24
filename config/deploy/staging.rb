@@ -1,11 +1,12 @@
 #set unique application name for staging and production to avoid permission problems when running deploy:check
 set :application, 'staging.application.com'
+set :user, 'staging-username'
 
 #set remote deploy path
 set :deploy_to, -> { "/home/staging-application" }
 
 #set remote server details
-server 'web.server.ip', user: 'staging-username', roles: %w{web app db}
+server 'web.server.ip', user: fetch(:user), roles: %w{web app db}
 
 set :stage, :staging
 set :log_level, :info
