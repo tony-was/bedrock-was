@@ -1,5 +1,6 @@
 #set your app name here - should be the dir where it will be deployed to
 set :application, 'application.dev'
+set :dev_application, 'application.dev'
 
 #set your repo url here
 set :repo_url, 'git@github.com:username/repository.git'
@@ -111,7 +112,8 @@ namespace :migrate do
             execute :gunzip, "#{fetch(:wpcli_local_db_file)}.gz"
             within fetch(:vagrant_root) do
               execute :vagrant, :up
-              execute "ssh -i ~/.vagrant.d/insecure_private_key vagrant@#{fetch(:dev_application)} mysql -u#{ENV['DB_USER']} -p#{ENV['DB_PASSWORD']} #{ENV['DB_NAME']} < #{fetch(:wpcli_local_db_file)}"
+              execute "ssh -i ~/.vagrant.d/insecure_private_key vagrant@#{fetch(:dev_application)} 'mysql -u#{ENV['DB_USER']} -p#{ENV['DB_PASSWORD']} #{ENV['DB_NAME']}' < #{fetch(:wpcli_local_db_file)}"
+              execute "ssh -i ~/.vagrant.d/insecure_private_key vagrant@#{fetch(:dev_application)} 'cd /srv/www/#{fetch(:dev_application)}/current && wp search-replace #{fetch(:application)} #{fetch(:dev_application)}'"
             end
             execute "rm #{fetch(:wpcli_local_db_file)}"
           end
