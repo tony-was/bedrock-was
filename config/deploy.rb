@@ -96,7 +96,7 @@ after 'deploy:publishing', 'grunt:build'
 set :base_db_filename, -> {"#{fetch(:application)}-#{Time.now.getutc.to_i}.sql"}
 set :wpcli_remote_db_file, -> {"#{fetch(:tmp_dir)}/#{fetch(:base_db_filename)}"}
 set :wpcli_local_db_file, -> {"/tmp/#{fetch(:base_db_filename)}"}
-set :vagrant_root, -> {"../bedrock-ansible"}
+set :vagrant_root, -> {"../../bedrock-ansible"}
 namespace :migrate do
   namespace :pull do
     desc "Downloads both remote database & syncs remote files into Vagrant"
