@@ -24,7 +24,9 @@ namespace :apache2 do
   desc 'Reload apache2'
   task :reload do
     on roles(:app) do
-      sudo '/etc/init.d/apache2 reload'
+      run_locally do
+        execute "ssh -i ~/.ssh/WASAU.pem ubuntu@#{fetch(:application)} sudo service apache2 restart"
+      end
     end
   end
 end
