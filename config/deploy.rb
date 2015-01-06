@@ -114,8 +114,9 @@ namespace :migrate do
             execute :gunzip, "#{fetch(:wpcli_local_db_file)}.gz"
             within fetch(:vagrant_root) do
               execute :vagrant, :up
+              execute "ssh -i ~/.vagrant.d/insecure_private_key vagrant@#{fetch(:dev_application)} 'cd /home/vagrant/sites/#{fetch(:dev_application)} && composer update --no-interaction --quiet --optimize-autoloader'"
               execute "ssh -i ~/.vagrant.d/insecure_private_key vagrant@#{fetch(:dev_application)} 'mysql -u#{ENV['DB_USER']} -p#{ENV['DB_PASSWORD']} #{ENV['DB_NAME']}' < #{fetch(:wpcli_local_db_file)}"
-              execute "ssh -i ~/.vagrant.d/insecure_private_key vagrant@#{fetch(:dev_application)} 'cd /home/vagrat/sites/#{fetch(:dev_application)} && wp search-replace #{fetch(:application)} #{fetch(:dev_application)}'"
+              execute "ssh -i ~/.vagrant.d/insecure_private_key vagrant@#{fetch(:dev_application)} 'cd /home/vagrant/sites/#{fetch(:dev_application)} && wp search-replace #{fetch(:application)} #{fetch(:dev_application)}'"
             end
             execute "rm #{fetch(:wpcli_local_db_file)}"
           end
