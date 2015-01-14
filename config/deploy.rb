@@ -56,19 +56,6 @@ end
 
 #after 'deploy:publishing', 'deploy:update_option_paths'
 
-namespace :npm do
-  desc 'Install npm'
-  task :install do
-    on roles(:app) do
-        within fetch(:release_path).join('web/app/themes/roots') do
-            execute 'npm', 'install'
-        end
-    end
-  end
-end
-
-after 'deploy:publishing', 'npm:install'
-
 namespace :composer do
   desc 'Composer update'
   task :update do
@@ -80,7 +67,20 @@ namespace :composer do
   end
 end
 
-after 'deploy:publishing', 'composer:update'
+before 'deploy:publishing', 'composer:update'
+
+namespace :npm do
+  desc 'Install npm'
+  task :install do
+    on roles(:app) do
+        within fetch(:release_path).join('web/app/themes/roots') do
+            execute 'npm', 'install'
+        end
+    end
+  end
+end
+
+after 'composer:update', 'npm:install'
 
 namespace :grunt do
   desc 'Grunt build'
@@ -93,7 +93,7 @@ namespace :grunt do
   end
 end
 
-after 'deploy:publishing', 'grunt:build'
+after 'npm:install', 'grunt:build'
 
 set :base_db_filename, -> {"#{fetch(:application)}-#{Time.now.getutc.to_i}.sql"}
 set :wpcli_remote_db_file, -> {"#{fetch(:tmp_dir)}/#{fetch(:base_db_filename)}"}
