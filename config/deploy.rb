@@ -67,7 +67,7 @@ namespace :composer do
   end
 end
 
-before 'deploy:publishing', 'composer:update'
+after 'deploy:updating', 'composer:update'
 
 namespace :npm do
   desc 'Install npm'
