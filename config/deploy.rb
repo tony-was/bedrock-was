@@ -74,7 +74,7 @@ namespace :npm do
   desc 'Install npm'
   task :install do
     on roles(:app) do
-        within fetch(:release_path).join('web/app/themes/#{fetch(:theme_dir)}') do
+        within fetch(:release_path).join("web/app/themes/#{fetch(:theme_dir)}") do
             execute 'npm', 'install'
         end
     end
@@ -87,7 +87,7 @@ namespace :grunt do
   desc 'Grunt build'
   task :build do
     on roles(:app) do
-        within fetch(:release_path).join('web/app/themes/#{fetch(:theme_dir)}') do
+        within fetch(:release_path).join("web/app/themes/#{fetch(:theme_dir)}") do
             execute 'grunt', 'build'
         end
     end
