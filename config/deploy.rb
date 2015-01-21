@@ -1,6 +1,7 @@
 #set your app name here - should be the dir where it will be deployed to
 set :application, 'application.dev'
 set :dev_application, 'application.dev'
+set :theme_dir, 'roots'
 
 #set your repo url here
 set :repo_url, 'git@github.com:username/repository.git'
@@ -73,7 +74,7 @@ namespace :npm do
   desc 'Install npm'
   task :install do
     on roles(:app) do
-        within fetch(:release_path).join('web/app/themes/roots') do
+        within fetch(:release_path).join('web/app/themes/#{fetch(:theme_dir)}') do
             execute 'npm', 'install'
         end
     end
@@ -86,7 +87,7 @@ namespace :grunt do
   desc 'Grunt build'
   task :build do
     on roles(:app) do
-        within fetch(:release_path).join('web/app/themes/roots') do
+        within fetch(:release_path).join('web/app/themes/#{fetch(:theme_dir)}') do
             execute 'grunt', 'build'
         end
     end
@@ -117,6 +118,7 @@ namespace :migrate do
               execute "ssh -i ~/.vagrant.d/insecure_private_key vagrant@#{fetch(:dev_application)} 'cd /home/vagrant/sites/#{fetch(:dev_application)} && composer install --no-interaction --quiet --optimize-autoloader'"
               execute "ssh -i ~/.vagrant.d/insecure_private_key vagrant@#{fetch(:dev_application)} 'mysql -u#{ENV['DB_USER']} -p#{ENV['DB_PASSWORD']} #{ENV['DB_NAME']}' < #{fetch(:wpcli_local_db_file)}"
               execute "ssh -i ~/.vagrant.d/insecure_private_key vagrant@#{fetch(:dev_application)} 'cd /home/vagrant/sites/#{fetch(:dev_application)} && wp search-replace #{fetch(:application)} #{fetch(:dev_application)}'"
+              execute "ssh vagrant@#{fetch(:dev_application)} 'cd /home/vagrant/sites/#{fetch(:dev_application)}/web/app/themes/#{fetch(:theme_dir)} && grunt dev'"
             end
             execute "rm #{fetch(:wpcli_local_db_file)}"
           end
