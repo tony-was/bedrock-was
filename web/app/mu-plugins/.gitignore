@@ -1,0 +1,5 @@
+*
+!.gitignore
+!bedrock-autoloader.php
+!disallow-indexing.php
+!register-theme-directory.php
